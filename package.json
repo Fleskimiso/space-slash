@@ -1,0 +1,42 @@
+{
+  "name": "space-slash",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sci-fi theme shooter game",
+  "author": {
+    "name": "Dawid Pawłowicz"
+  },
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "register-service-worker": "^1.7.1",
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-pwa": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "_id": "space-slash@1.0.0",
+  "bugs": {
+    "url": "https://github.com/Fleskimiso/Space-Slash/issues"
+  },
+  "homepage": "https://github.com/Fleskimiso/Space-Slash#readme",
+  "license": "GPL-3.0",
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fleskimiso/Space-Slash.git"
+  }
+}
