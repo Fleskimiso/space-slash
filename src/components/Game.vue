@@ -88,15 +88,30 @@ export default {
           alfaRot = -Math.PI + alfaRot;
         }
         alfaRot = -(alfaRot - Math.PI/2) 
+        
+        // that much code was not very nessecary, might as well just left it for the allowed ranges of rotations
+        // that is right difference between old and new ROT, so that there is no bug
+        // ~~ for now outside earthshipray rotating seems ok
+        if(-mousePosition.y+ appHeight/2 < 0 && alfaRot < (3/2) * Math.PI) {
+          if( Math.abs(SpaceShip.rotation - alfaRot) > Math.PI/25 && Math.abs(SpaceShip.rotation - alfaRot) < Math.PI/3 ||  Math.abs(SpaceShip.rotation - alfaRot) > 3*Math.PI/2  ){
+          SpaceShip.rotation = alfaRot;
+        }
+        }else if (-mousePosition.y+ appHeight/2 > 0 &&
+         ( (alfaRot> 0 &&  alfaRot < (1/2) * Math.PI)
+          || (alfaRot > (3/2) * Math.PI && alfaRot < 2 * Math.PI ) ) ) {
+          if( Math.abs(SpaceShip.rotation - alfaRot) > Math.PI/25 && Math.abs(SpaceShip.rotation - alfaRot) < Math.PI/3 ||  Math.abs(SpaceShip.rotation - alfaRot) > 3*Math.PI/2  ){
+          SpaceShip.rotation = alfaRot;
+        }
+        }
+        
+
         const tgAlfaPos = Number( -mousePosition.y+appHeight/2) /Number(mousePosition.x-appWidth/2);
         let alfaPos = Math.atan(tgAlfaPos);
         if(mousePosition.x -appWidth/2 < 0){
           alfaPos = +Math.PI + alfaPos;
         }
        
-        if( Math.abs(SpaceShip.rotation - alfaRot) > Math.PI/50  ){
-          SpaceShip.rotation = alfaRot;
-        }
+        
        
         SpaceShip.position.x = Math.floor(shipEarthRay * Math.cos(alfaPos) + appWidth/2,);
         SpaceShip.position.y = Math.floor( -shipEarthRay * Math.sin(alfaPos) + appHeight/2);
