@@ -8,6 +8,7 @@ import * as PIXI from "pixi.js";
 import { onMounted, ref } from "vue";
 import earthPath from "../assets/graphics/specific/EarthPlanet.png";
 import spaceshipPath from "../assets/graphics/specific/SpaceShip.png";
+import  lastAngelSoundTrackPath from "../assets/music/fato_shadow_-_last_angel.mp3";
 
 
 export default {
@@ -44,8 +45,12 @@ export default {
 
       let shipEarthRay = 0;
 
+      //music 
+      let mainAudioTrack = null
+
       loader.add("earth",earthPath)
       .add("spaceship",spaceshipPath)
+      .add("maintrack", lastAngelSoundTrackPath)
       .load((smth, resour) =>{
       Earth = new PIXI.Sprite(loader.resources["earth"].texture);
       Earth.pivot.x = Earth.width/2;
@@ -66,6 +71,10 @@ export default {
 
       shipEarthRay = SpaceShip.height/2 + Earth.height/2;
 
+      mainAudioTrack = new window.Audio(lastAngelSoundTrackPath);
+      mainAudioTrack.play();
+      mainAudioTrack.loop = true;
+
       pixiApp.ticker.maxFPS = 20;
       pixiApp.ticker.add(delta => gameLoop(delta));
 
@@ -75,6 +84,7 @@ export default {
 
       function gameLoop(delta) {
         const mousePosition = pixiApp.renderer.plugins.interaction.mouse.global;
+        // text info about positions
         absolutePositionMessage.text = "Absolute x: " + mousePosition.x + " y: " + mousePosition.y;
         relativePositionMessage.text = "Relative x: " + (mousePosition.x - appWidth/2) + " y: " + (-mousePosition.y + appHeight/2);
         spaceshipPositionMessage.text = (Math.abs(-mousePosition.y + appHeight/2) < Earth.height/2 && Math.abs(mousePosition.x - appWidth/2) < Earth.height/2) ;
@@ -104,22 +114,23 @@ export default {
         }
         }
         
-
+        // calculating angle
         const tgAlfaPos = Number( -mousePosition.y+appHeight/2) /Number(mousePosition.x-appWidth/2);
         let alfaPos = Math.atan(tgAlfaPos);
         if(mousePosition.x -appWidth/2 < 0){
           alfaPos = +Math.PI + alfaPos;
         }
-       
-        
-       
+      // setting position according to angle
         SpaceShip.position.x = Math.floor(shipEarthRay * Math.cos(alfaPos) + appWidth/2,);
         SpaceShip.position.y = Math.floor( -shipEarthRay * Math.sin(alfaPos) + appHeight/2);
-        
+        // unnessecary code for now
         lastmouseX = mousePosition.x + appWidth/2
         lastmouseY = -mousePosition.y + appHeight/2
+        // TODO shooting or something like that
         
-        
+        //steering 
+
+
 
       };
           
