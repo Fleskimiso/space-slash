@@ -9,7 +9,9 @@ import { onMounted, ref } from "vue";
 import earthPath from "../assets/graphics/specific/EarthPlanet.png";
 import spaceshipPath from "../assets/graphics/specific/SpaceShip.png";
 import  lastAngelSoundTrackPath from "../assets/music/fato_shadow_-_last_angel.mp3";
-
+import smallShipPath from "../assets/graphics/specific/EnemyShip1.png";
+import bigShipPath from "../assets/graphics/specific/EnemyShip1.png";
+import { EnemyShip } from "./EnemyShip"; 
 
 export default {
   name: "Game",
@@ -29,6 +31,7 @@ export default {
 
       let Earth = new PIXI.Sprite();
       let SpaceShip = new PIXI.Sprite();
+      let enemyShipsArray = []
 
       let absolutePositionMessage = new PIXI.Text("Hello world");
       pixiApp.stage.addChild(absolutePositionMessage);
@@ -51,6 +54,8 @@ export default {
       loader.add("earth",earthPath)
       .add("spaceship",spaceshipPath)
       .add("maintrack", lastAngelSoundTrackPath)
+      .add("smallEnemyShip", smallShipPath)
+      .add("bigEnemyShip", bigShipPath)
       .load((smth, resour) =>{
       Earth = new PIXI.Sprite(loader.resources["earth"].texture);
       Earth.pivot.x = Earth.width/2;
@@ -68,6 +73,13 @@ export default {
       SpaceShip.scale.y = 0.5;
       SpaceShip.position.x = appWidth/2;
       SpaceShip.position.y = appHeight/2 - Earth.height/2 - SpaceShip.height/2;
+
+      //... adding some ships ALSO TESTING
+      enemyShipsArray.push(new EnemyShip(loader,2,300,300));
+      enemyShipsArray.push(new EnemyShip(loader,1,500,500));
+      enemyShipsArray.forEach(enemyVessel => {
+        pixiApp.stage.addChild(enemyVessel)
+      })
 
       shipEarthRay = SpaceShip.height/2 + Earth.height/2;
 
