@@ -10,7 +10,7 @@ import earthPath from "../assets/graphics/specific/EarthPlanet.png";
 import spaceshipPath from "../assets/graphics/specific/SpaceShip.png";
 import  lastAngelSoundTrackPath from "../assets/music/fato_shadow_-_last_angel.mp3";
 import smallShipPath from "../assets/graphics/specific/EnemyShip1.png";
-import bigShipPath from "../assets/graphics/specific/EnemyShip1.png";
+import bigShipPath from "../assets/graphics/specific/EnemyShip2.png";
 import { EnemyShip } from "./EnemyShip"; 
 
 export default {
@@ -31,7 +31,16 @@ export default {
 
       let Earth = new PIXI.Sprite();
       let SpaceShip = new PIXI.Sprite();
-      let enemyShipsArray = []
+      let enemyShipsArray = [];
+
+      function calculateRotationForEnemies(vessel){
+        let ves_x = vessel.sprite.position.x;
+        let ves_y = vessel.sprite.position.y;
+        ves_x -= appWidth/2;
+        ves_y = -(ves_y - appHeight/2)
+        let angle = Math.atan2(ves_x,ves_y)
+        return angle+Math.PI
+      }
 
       let absolutePositionMessage = new PIXI.Text("Hello world");
       pixiApp.stage.addChild(absolutePositionMessage);
@@ -42,7 +51,7 @@ export default {
       relativePositionMessage.position.set(appWidth - 400, 60);
       relativePositionMessage.style.fill = "white";
       let spaceshipPositionMessage = new PIXI.Text("posss")
-      pixiApp.stage.addChild(spaceshipPositionMessage)
+      pixiApp.stage.addChild(spaceshipPositionMessage);
       spaceshipPositionMessage.style.fill = "white";
       spaceshipPositionMessage.position.set(appWidth -400, 90);
 
@@ -77,9 +86,37 @@ export default {
       //... adding some ships ALSO TESTING
       enemyShipsArray.push(new EnemyShip(loader,2,300,300));
       enemyShipsArray.push(new EnemyShip(loader,1,500,500));
+      // dummy ships for testing purposes
+      for(let i=0; i<15; i++){
+        let side_probability = Math.random();
+        let x_pos = 0;
+        let y_pos = 0;
+        let type = 1;
+        if( side_probability >= 0 &&  side_probability < 0.25) { //right side
+            x_pos = appWidth;
+            y_pos = appHeight * Math.random();
+        }else if (side_probability >=0.25 && side_probability < 0.5){ //up side
+            x_pos = appWidth * Math.random();
+        }else if( side_probability>= 0.5 && side_probability <0.75){ //left side
+            y_pos  = appHeight * Math.random();          
+        }else if (side_probability >= 0.75 && side_probability <=1){ //bottom side
+            y_pos = appHeight;
+            x_pos = appWidth * Math.random();
+        }
+        let type_probability = Math.random();
+        if(type_probability > 0.3){
+          type = 1; //small ship
+        }else {
+          type =2; //big ship
+        }
+        enemyShipsArray.push(new EnemyShip(loader,type,x_pos,y_pos))
+      }
       enemyShipsArray.forEach(enemyVessel => {
-        pixiApp.stage.addChild(enemyVessel)
+        pixiApp.stage.addChild(enemyVessel.sprite);
+        enemyVessel.sprite.rotation = calculateRotationForEnemies(enemyVessel);
+        enemyVessel.actualizeSinAndCos();
       })
+
 
       shipEarthRay = SpaceShip.height/2 + Earth.height/2;
 
@@ -141,7 +178,11 @@ export default {
         // TODO shooting or something like that
         
         //steering 
-
+        // enemyshipmovements
+        let recalibratedDelta = delta/1000
+        enemyShipsArray.forEach(vessel =>{
+          vessel.move(recalibratedDelta);
+        })
 
 
       };
