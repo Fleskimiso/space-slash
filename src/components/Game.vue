@@ -11,7 +11,9 @@ import spaceshipPath from "../assets/graphics/specific/SpaceShip.png";
 import  lastAngelSoundTrackPath from "../assets/music/fato_shadow_-_last_angel.mp3";
 import smallShipPath from "../assets/graphics/specific/EnemyShip1.png";
 import bigShipPath from "../assets/graphics/specific/EnemyShip2.png";
+import beam1Path from "../assets/graphics/specific/beam1.png";
 import { EnemyShip } from "./EnemyShip"; 
+import { Bullet } from "./Bullet";
 
 export default {
   name: "Game",
@@ -19,7 +21,7 @@ export default {
     onMounted(() => {
       const pixiCanvas = document.getElementById("pixiCanvas");
       const appWidth = 1200;
-      const appHeight = 600
+      const appHeight = 600;
       const pixiApp = new PIXI.Application({
         width: appWidth,
         height: appHeight,
@@ -30,8 +32,12 @@ export default {
       const loader = new PIXI.Loader();
 
       let Earth = new PIXI.Sprite();
+      let earthHealth = 100;
+      let score = 0;
+      let damage = 10; 
       let SpaceShip = new PIXI.Sprite();
       let enemyShipsArray = [];
+      let bulletArray = [];
 
       function calculateRotationForEnemies(vessel){
         let ves_x = vessel.sprite.position.x;
@@ -42,18 +48,15 @@ export default {
         return angle+Math.PI
       }
 
-      let absolutePositionMessage = new PIXI.Text("Hello world");
-      pixiApp.stage.addChild(absolutePositionMessage);
-      absolutePositionMessage.position.set(appWidth - 400, 30);
-      absolutePositionMessage.style.fill = "white";
-      let relativePositionMessage = new PIXI.Text("Hello you mortal!");
-      pixiApp.stage.addChild(relativePositionMessage);
-      relativePositionMessage.position.set(appWidth - 400, 60);
-      relativePositionMessage.style.fill = "white";
-      let spaceshipPositionMessage = new PIXI.Text("posss")
-      pixiApp.stage.addChild(spaceshipPositionMessage);
-      spaceshipPositionMessage.style.fill = "white";
-      spaceshipPositionMessage.position.set(appWidth -400, 90);
+      let messageHealth = new PIXI.Text( "Planet Health: " + String(earthHealth));
+      pixiApp.stage.addChild(messageHealth);
+      messageHealth.position.set(appWidth - 400, 30);
+      messageHealth.style.fill = "white";
+      let messagescore = new PIXI.Text("Score: "+ String(score));
+      pixiApp.stage.addChild(messagescore);
+      messagescore.position.set(appWidth - 400, 60);
+      messagescore.style.fill = "white";
+    
 
       let shipEarthRay = 0;
 
@@ -65,6 +68,7 @@ export default {
       .add("maintrack", lastAngelSoundTrackPath)
       .add("smallEnemyShip", smallShipPath)
       .add("bigEnemyShip", bigShipPath)
+      .add("beam1",beam1Path)
       .load((smth, resour) =>{
       Earth = new PIXI.Sprite(loader.resources["earth"].texture);
       Earth.pivot.x = Earth.width/2;
@@ -83,9 +87,6 @@ export default {
       SpaceShip.position.x = appWidth/2;
       SpaceShip.position.y = appHeight/2 - Earth.height/2 - SpaceShip.height/2;
 
-      //... adding some ships ALSO TESTING
-      enemyShipsArray.push(new EnemyShip(loader,2,300,300));
-      enemyShipsArray.push(new EnemyShip(loader,1,500,500));
       // dummy ships for testing purposes
       for(let i=0; i<15; i++){
         let side_probability = Math.random();
@@ -131,37 +132,38 @@ export default {
       let lastmouseX = 500;
       let lastmouseY = 500;
 
+      
+      //on click shoot beam
+      pixiCanvas.addEventListener("click", () =>{
+        console.log("click");
+            bulletArray.push(new Bullet(loader,"beam",SpaceShip.position.x,SpaceShip.position.y,SpaceShip.rotation));
+            pixiApp.stage.addChild(bulletArray[bulletArray.length-1].sprite);
+            bulletArray.push(new Bullet(loader,"beam",SpaceShip.position.x,SpaceShip.position.y,SpaceShip.rotation + Math.PI/12));
+            pixiApp.stage.addChild(bulletArray[bulletArray.length-1].sprite);
+            bulletArray.push(new Bullet(loader,"beam",SpaceShip.position.x,SpaceShip.position.y,SpaceShip.rotation - Math.PI/12));
+            pixiApp.stage.addChild(bulletArray[bulletArray.length-1].sprite);
+            if(score > 500) {
+              bulletArray.push(new Bullet(loader,"beam",SpaceShip.position.x,SpaceShip.position.y,SpaceShip.rotation + Math.PI/6));
+            pixiApp.stage.addChild(bulletArray[bulletArray.length-1].sprite);
+            bulletArray.push(new Bullet(loader,"beam",SpaceShip.position.x,SpaceShip.position.y,SpaceShip.rotation - Math.PI/6));
+            pixiApp.stage.addChild(bulletArray[bulletArray.length-1].sprite);
+            damage = 20;
+            }
+            if(score > 1000){
+              damage = 40;
+            }
+      })
+
       function gameLoop(delta) {
         const mousePosition = pixiApp.renderer.plugins.interaction.mouse.global;
         // text info about positions
-        absolutePositionMessage.text = "Absolute x: " + mousePosition.x + " y: " + mousePosition.y;
-        relativePositionMessage.text = "Relative x: " + (mousePosition.x - appWidth/2) + " y: " + (-mousePosition.y + appHeight/2);
-        spaceshipPositionMessage.text = (Math.abs(-mousePosition.y + appHeight/2) < Earth.height/2 && Math.abs(mousePosition.x - appWidth/2) < Earth.height/2) ;
+        messageHealth.text = "Planet Health: " + String(earthHealth);
+        messagescore.text = "Score: " + String(score);
         
       
-           //rotating to cursor ray should take 2s and getting to position aswell
-        const tgA = Number( -mousePosition.y+appHeight/2-(appHeight/2-SpaceShip.y))
-        /Number(mousePosition.x-appWidth/2-(SpaceShip.x-appWidth/2));
-        let alfaRot = Math.atan(tgA);
-        if(mousePosition.x -appWidth/2 < 0){
-          alfaRot = -Math.PI + alfaRot;
-        }
-        alfaRot = -(alfaRot - Math.PI/2) 
-        
-        // that much code was not very nessecary, might as well just left it for the allowed ranges of rotations
-        // that is right difference between old and new ROT, so that there is no bug
-        // ~~ for now outside earthshipray rotating seems ok
-        if(-mousePosition.y+ appHeight/2 < 0 && alfaRot < (3/2) * Math.PI) {
-          if( Math.abs(SpaceShip.rotation - alfaRot) > Math.PI/25 && Math.abs(SpaceShip.rotation - alfaRot) < Math.PI/3 ||  Math.abs(SpaceShip.rotation - alfaRot) > 3*Math.PI/2  ){
-          SpaceShip.rotation = alfaRot;
-        }
-        }else if (-mousePosition.y+ appHeight/2 > 0 &&
-         ( (alfaRot> 0 &&  alfaRot < (1/2) * Math.PI)
-          || (alfaRot > (3/2) * Math.PI && alfaRot < 2 * Math.PI ) ) ) {
-          if( Math.abs(SpaceShip.rotation - alfaRot) > Math.PI/25 && Math.abs(SpaceShip.rotation - alfaRot) < Math.PI/3 ||  Math.abs(SpaceShip.rotation - alfaRot) > 3*Math.PI/2  ){
-          SpaceShip.rotation = alfaRot;
-        }
-        }
+        let rotX = (mousePosition.x - appWidth/2) - (SpaceShip.position.x - appWidth/2);
+        let rotY = (-mousePosition.y + appHeight/2) - (-SpaceShip.position.y + appHeight/2);
+        SpaceShip.rotation = Math.atan2(rotX,rotY);
         
         // calculating angle
         const tgAlfaPos = Number( -mousePosition.y+appHeight/2) /Number(mousePosition.x-appWidth/2);
@@ -183,9 +185,74 @@ export default {
         enemyShipsArray.forEach(vessel =>{
           vessel.move(recalibratedDelta);
         })
+        // if within planet range, decrease health
+        enemyShipsArray.forEach(vessel =>{
+          if(Earth.containsPoint( new PIXI.Point(vessel.sprite.position.x,vessel.sprite.position.y)) ){
+              earthHealth = earthHealth - 10;
+              console.log("fulfilled should disappear");
+              pixiApp.stage.removeChild(vessel.sprite);
+              enemyShipsArray = enemyShipsArray.filter( vessel2 => vessel !== vessel2);
+           }
+        })
+        // move bullets
+        if(bulletArray !== undefined){
+          bulletArray.forEach(bullet =>{
+          bullet.move(recalibratedDelta);
+          if(bullet.lifetime < 0 ){
+            pixiApp.stage.removeChild(bullet.sprite);
+            bulletArray = bulletArray.filter(otherBulltet => otherBulltet !== bullet);
+          }
+          enemyShipsArray.forEach(vessel =>{
+            if(vessel.sprite.containsPoint( new PIXI.Point(bullet.sprite.position.x,bullet.sprite.position.y))){
+              vessel.health -= damage;
+              pixiApp.stage.removeChild(bullet.sprite);
+              bulletArray = bulletArray.filter(otherBulltet => otherBulltet !== bullet);
+              if(vessel.health <= 0){
+                 if(vessel.type == 1){
+                score += 10;
+              }else {
+                score += 30;
+              }
+              //add two new faster healther ship at randomized position
+              EnemyShip.healthMultiplier += 0.04;
+              EnemyShip.speedMultiplier += 0.01;
+              let shiptype = vessel.type;
+              let radious = 800;
+              let angle1 = Math.random() * 2 *Math.PI;
+              let angle2 = Math.random() * 2 *Math.PI
+              enemyShipsArray.push(new EnemyShip(loader,shiptype,radious*Math.cos(angle1) + appWidth/2,
+              radious*Math.sin(angle1) + appHeight/2 ));
+              pixiApp.stage.addChild(enemyShipsArray[enemyShipsArray.length-1].sprite);
+              enemyShipsArray[enemyShipsArray.length-1].sprite.rotation = calculateRotationForEnemies(enemyShipsArray[enemyShipsArray.length-1]);
+              enemyShipsArray[enemyShipsArray.length-1].actualizeSinAndCos();
+              enemyShipsArray[enemyShipsArray.length-1].health *= EnemyShip.healthMultiplier;
+              enemyShipsArray[enemyShipsArray.length-1].speed *= EnemyShip.speedMultiplier;
+
+                enemyShipsArray.push(new EnemyShip(loader,shiptype,radious*Math.cos(angle2) + appWidth/2,
+              radious*Math.sin(angle2) + appHeight/2 ));
+              pixiApp.stage.addChild(enemyShipsArray[enemyShipsArray.length-1].sprite);
+                 enemyShipsArray[enemyShipsArray.length-1].sprite.rotation = calculateRotationForEnemies(enemyShipsArray[enemyShipsArray.length-1]);
+              enemyShipsArray[enemyShipsArray.length-1].actualizeSinAndCos();
+                 enemyShipsArray[enemyShipsArray.length-1].health *= EnemyShip.healthMultiplier;
+              enemyShipsArray[enemyShipsArray.length-1].speed *= EnemyShip.speedMultiplier;
+
+               pixiApp.stage.removeChild(vessel.sprite);
+              enemyShipsArray = enemyShipsArray.filter(vessel2 => vessel2 !== vessel);
+              }
+            }
+          });
+        });
+        }
+        //after bullets 
+      // keeping enemy count to maximally 60 
+      while(enemyShipsArray.length > 60){
+        pixiApp.stage.removeChild(enemyShipsArray[enemyShipsArray.length-1].sprite)
+        enemyShipsArray.pop();
+      }
 
 
       };
+    
           
     });
   },

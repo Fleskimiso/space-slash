@@ -7,11 +7,13 @@ export class EnemyShip {
     speed = 0
     sinusOfRotation =0 
     cosinusOfRotation = 0
+    static healthMultiplier = 1
+    static speedMultiplier = 1 
     constructor(loader,type, x,y) {
       if(type === 1){
         this.sprite = new PIXI.Sprite(loader.resources["smallEnemyShip"].texture);
         this.health = 10
-        this.speed = 170
+        this.speed = 250
         this.sprite.scale.x = 0.5
         this.sprite.scale.y = 0.5
       }else if(type ===2){
@@ -19,7 +21,7 @@ export class EnemyShip {
         this.sprite.scale.x = 0.4
         this.sprite.scale.y = 0.4
         this.health = 25
-        this.speed = 110
+        this.speed = 200
       }// no default for now
       //default rotation
       this.sprite.rotation = -Math.PI/2;
